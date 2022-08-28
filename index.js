@@ -1,12 +1,11 @@
 let obj={}
-let ID=[]
 let steps=['Order placed','Chef received the order and started preparing','You have 8 seconds to cancel order','Pizza sauce added','First layer of cheeze added','Toppings added','Second layer of cheeze added','Pizza baked','Oregano added and packed','Package received at counter']
 let orderCardsWrapper=document.getElementById('order-cards-wrapper')
 let click=false;
 const executeOrder=async ()=>{
     let orderId=document.getElementById('order-id-input').value
     
-    if(orderId && !ID.includes(orderId)){
+    if(orderId && !obj.hasOwnProperty(orderId)){
         let colDiv=document.createElement('div')
         let cardDiv=document.createElement('div')
         let cardHeader=document.createElement('div')
@@ -35,26 +34,18 @@ const executeOrder=async ()=>{
         cardFooter.innerText=Date()
 
 
-        cardDiv.appendChild(cardHeader)
-        cardDiv.appendChild(cardBody)
-        cardDiv.appendChild(cardFooter)
+        cardDiv.append(cardHeader,cardBody,cardFooter)
         colDiv.appendChild(cardDiv)
         orderCardsWrapper.appendChild(colDiv)
-        cardBody.appendChild(cardText)
-        cardBody.appendChild(orderStatusPara)
-        cardBody.appendChild(orderCancel)
+        cardBody.append(cardText,orderStatusPara,orderCancel)
         orderStatusPara.appendChild(orderStatus)
 
-        ID.push(orderId)
         obj[orderId]=[]
         document.getElementById('order-id-input').value=''
         
         orderCancel.addEventListener('click',function(){
-            let index=ID.indexOf(orderId)
-            ID.splice(index,1)
             click=true;
-            reset(orderStatus,orderCancel,orderId)
-            // orderCardsWrapper.removeChild(colDiv)
+            reset(colDiv,orderStatus,orderCancel,orderId)
         })
         try {
             commonPromise(0,0,orderStatus,orderId) 
@@ -93,19 +84,23 @@ const commonPromise=(step,time,ele,id)=>{
     })
 }
 
-const reset=(ele,cancel,id)=>{
+const reset=(card,ele,cancel,id)=>{
     if(obj[id].length<=4 && click==true){
         obj[id].forEach((element)=>{
             clearTimeout(element)
         })
         ele.innerText='Order Canceled'
         click=false;
-        cancel.style.pointerEvents='none'
+        cancel.innerText='Close'
+        cancel.addEventListener('click',()=>{
+            orderCardsWrapper.removeChild(card)
+        })
+        //cancel.style.pointerEvents='none'
         
        
-    //    console.log(obj[id])
-       delete obj[id]
-    //    console.log(obj)
+        //console.log(obj[id])
+        delete obj[id]
+        //console.log(obj)
        
     }
     else if(click==true){
